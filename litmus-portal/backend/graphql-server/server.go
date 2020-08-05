@@ -1,7 +1,8 @@
 package main
-
 import (
+	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/litmuschaos/litmus/litmus-portal/backend/graphql-server/graph"
@@ -13,23 +14,18 @@ import (
 	"log"
 	"net/http"
 	"time"
-
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
 )
-
 const defaultPort = "8080"
-
 func main() {
 	port := defaultPort
 	database.DBInit()
 	store.StoreInit()
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowCredentials: true,
+		AllowedOrigins: []string{"*"},
 	})
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
+	srv := handler.New(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 	srv.AddTransport(transport.POST{})
+	srv.AddTransport(transport.GET{})
 	srv.AddTransport(transport.Websocket{
 		KeepAlivePingInterval: 10 * time.Second,
 		Upgrader: websocket.Upgrader{
