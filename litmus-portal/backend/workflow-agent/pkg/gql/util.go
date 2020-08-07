@@ -34,34 +34,34 @@ func GenerateWorkflowPayload(cid, accessKey string, wfEvent types.WorkflowEvent)
 	return payload, nil
 }
 
-func CreatePodLog(podLog types.PodLogRequest)(types.PodLog, error){
+func CreatePodLog(podLog types.PodLogRequest) (types.PodLog, error) {
 	logDetails := types.PodLog{}
-	mainLog,err := logs.GetLogs(podLog.PodName,podLog.PodNamespace,"main")
+	mainLog, err := logs.GetLogs(podLog.PodName, podLog.PodNamespace, "main")
 	if err != nil {
 		return logDetails, err
 	}
 	log.Print(podLog)
-	logDetails.MainPod = strconv.Quote(strings.Replace(mainLog,`"`,`'`,-1))
-	logDetails.MainPod =logDetails.MainPod[1:len(logDetails.MainPod)-1]
-	if strings.ToLower(podLog.PodType)=="chaosengine" && podLog.ChaosNamespace!=nil{
+	logDetails.MainPod = strconv.Quote(strings.Replace(mainLog, `"`, `'`, -1))
+	logDetails.MainPod = logDetails.MainPod[1 : len(logDetails.MainPod)-1]
+	if strings.ToLower(podLog.PodType) == "chaosengine" && podLog.ChaosNamespace != nil {
 		chaosLog := make(map[string]string)
-		if podLog.ExpPod!=nil{
-			expLog, err := logs.GetLogs(*podLog.ExpPod,*podLog.ChaosNamespace,"")
-			if err==nil{
-				chaosLog[*podLog.ExpPod] = strconv.Quote(strings.Replace(expLog,`"`,`'`,-1))
-				chaosLog[*podLog.ExpPod] =chaosLog[*podLog.ExpPod][1:len(chaosLog[*podLog.ExpPod])-1]
+		if podLog.ExpPod != nil {
+			expLog, err := logs.GetLogs(*podLog.ExpPod, *podLog.ChaosNamespace, "")
+			if err == nil {
+				chaosLog[*podLog.ExpPod] = strconv.Quote(strings.Replace(expLog, `"`, `'`, -1))
+				chaosLog[*podLog.ExpPod] = chaosLog[*podLog.ExpPod][1 : len(chaosLog[*podLog.ExpPod])-1]
 			}
 		}
-		if podLog.RunnerPod!=nil{
-			runnerLog, err := logs.GetLogs(*podLog.RunnerPod,*podLog.ChaosNamespace,"")
-			if err==nil{
-				chaosLog[*podLog.RunnerPod] = strconv.Quote(strings.Replace(runnerLog,`"`,`'`,-1))
-				chaosLog[*podLog.RunnerPod] =chaosLog[*podLog.RunnerPod][1:len(chaosLog[*podLog.RunnerPod])-1]
+		if podLog.RunnerPod != nil {
+			runnerLog, err := logs.GetLogs(*podLog.RunnerPod, *podLog.ChaosNamespace, "")
+			if err == nil {
+				chaosLog[*podLog.RunnerPod] = strconv.Quote(strings.Replace(runnerLog, `"`, `'`, -1))
+				chaosLog[*podLog.RunnerPod] = chaosLog[*podLog.RunnerPod][1 : len(chaosLog[*podLog.RunnerPod])-1]
 			}
 		}
-		if podLog.ExpPod==nil && podLog.RunnerPod==nil{
+		if podLog.ExpPod == nil && podLog.RunnerPod == nil {
 			logDetails.ChaosPod = nil
-		}else{
+		} else {
 			logDetails.ChaosPod = chaosLog
 		}
 	}
@@ -83,7 +83,7 @@ func GenerateLogPayload(cid, accessKey string, podLog types.PodLogRequest) ([]by
 		return nil, err
 	}
 
-	mutation := `{ cluster_id: ` + clusterID + `, request_id:\"` + podLog.RequestID + `\", workflow_run_id: \"` + podLog.WorkflowRunID +`\", pod_name: \"` + podLog.PodName +`\", pod_type: \"` + podLog.PodType + `\", log:\"` + processed[1:len(processed)-1] + `\"}`
+	mutation := `{ cluster_id: ` + clusterID + `, request_id:\"` + podLog.RequestID + `\", workflow_run_id: \"` + podLog.WorkflowRunID + `\", pod_name: \"` + podLog.PodName + `\", pod_type: \"` + podLog.PodType + `\", log:\"` + processed[1:len(processed)-1] + `\"}`
 	var payload = []byte(`{"query":"mutation { podLog(log:` + mutation + ` )}"}`)
 
 	return payload, nil

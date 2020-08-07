@@ -21,6 +21,7 @@ func LogsHandler(podLog model.PodLog)(string, error){
 			Log:           podLog.Log,
 		}
 		reqChan <- &resp
+		close(reqChan)
 		return "LOGS SENT SUCCESSFULLY", nil
 	}
 	return "LOG REQUEST CANCELLED", nil

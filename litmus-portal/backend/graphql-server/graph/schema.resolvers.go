@@ -105,7 +105,7 @@ func (r *subscriptionResolver) WorkflowEventListener(ctx context.Context, projec
 	store.State.Mutex.Unlock()
 	go func() {
 		<-ctx.Done()
-		log.Print("CLOSED")
+		log.Print("CLOSED WORKFLOW LISTENER", projectID)
 	}()
 	return workflowEvent, nil
 }
@@ -119,7 +119,7 @@ func (r *subscriptionResolver) GetPodLog(ctx context.Context, podDetails model.P
 	store.State.Mutex.Unlock()
 	go func() {
 		<-ctx.Done()
-		log.Print("CLOSED")
+		log.Print("CLOSED LOG LISTENER", podDetails.ClusterID, podDetails.PodName)
 		delete(store.State.WorkflowLog, cid.String())
 	}()
 	go logs.GetLogs(cid.String(), podDetails)

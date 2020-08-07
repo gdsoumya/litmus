@@ -9,12 +9,11 @@ import (
 	"strings"
 )
 
-
-func Subscription( server, cid, accessKey string) {
+func Subscription(server, cid, accessKey string) {
 	client := &http.Client{}
 	clusterID := `{cluster_id: \"` + cid + `\", access_key: \"` + accessKey + `\"}`
 	query := `{
-			"query": "subscription { clusterConnect(clusterInfo: `+clusterID+`) { project_id action }  }"
+			"query": "subscription { clusterConnect(clusterInfo: ` + clusterID + `) { project_id action }  }"
 		}`
 
 	req, err := http.NewRequest("POST", server, strings.NewReader(query))
@@ -52,11 +51,11 @@ func Subscription( server, cid, accessKey string) {
 		podRequest := types.PodLogRequest{
 			RequestID: responseInterface["data"]["clusterConnect"]["project_id"],
 		}
-		err = json.Unmarshal([]byte(responseInterface["data"]["clusterConnect"]["action"]),&podRequest)
-		if err != nil{
+		err = json.Unmarshal([]byte(responseInterface["data"]["clusterConnect"]["action"]), &podRequest)
+		if err != nil {
 			log.Print(err)
 		}
-		SendPodLogs(server, cid, accessKey,podRequest)
+		SendPodLogs(server, cid, accessKey, podRequest)
 	}
 
 }
